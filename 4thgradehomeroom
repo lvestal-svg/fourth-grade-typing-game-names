@@ -117,7 +117,7 @@
     const TEACHERS=["Mr. Deller","Mrs. Farrar","Mrs. Liebrock","Mrs. Shaffer"];
     const CLASSLISTS={
       "Mr. Deller":["Muhammadaziz","Grayson","Dominik","Asher","Madison","Maddox","Arabella","Landon","Luca","DeAndre","Hazel","Vincent","Joann","John","Henry","Lillian","Hunter","Marigold","Juniper","Marvin","Owen","Caiden"],
-      "Mrs. Farrar":["Jillian","Brady","Luna","Ky'Noah","Coraline","Maximus","Penelope","Naomi","James","Tristan","Tynai","Alex","Carson","Caiden","Samantha","Dylan","Jack","Avery","John","Connor","Madelyn","Luke"],
+      "Mrs. Farrar":["Jillian","Brady","Luna","Ky'Noah","Coraline","Maximus","Penelope","Naomi","Jimmy","Tristan","Tynai","Alex","Carson","Caiden","Samantha","Dylan","Jack","Avery","Henry","Connor","Madelyn","Luke"],
       "Mrs. Liebrock":["Antonio","Greyson","Gradin","Gregory","Ella","Aryeh","Garrett","Austin","Leo","Samuel","Emilia","Ryder","Connor","Miles","Aria","Stella","Nicolas","Hadley","Eila","Charles","Kaylee","Blake"],
       "Mrs. Shaffer":["Keagan","Averie","Riley","Kaiya","Lindsay","Enzo","Zane","Mason","Meena","Rivir","Michaela","Mia","Colton","Amelia","Jackson","Julian","Grayson","Luke","Santino","Rowan","Connor","Matthew"]
     };
