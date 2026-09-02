@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build Your Class - 4th Grade Typing Game</title>
+  <style>
+    :root{
+      --bg1:#fffbec; --bg2:#e5f8ff; --bg3:#f5f0ff; --card:#ffffff; --text:#0f172a;
+    }
+    body{
+      margin:0; font-family:system-ui,Segoe UI,Roboto,sans-serif;
+      background:radial-gradient(1200px 800px at 10% -10%, var(--bg2), transparent 60%),
+                 radial-gradient(1000px 1000px at 110% 0%, var(--bg3), transparent 60%),
+                 radial-gradient(900px 700px at 50% 120%, var(--bg1), transparent 60%),
+                 linear-gradient(180deg,#e9f7ff,#fff);
+      color:var(--text); display:flex; align-items:center; justify-content:center; padding:24px; height:100vh;
+    }
+    .app{width:100%; max-width:1000px}
+    .card{background:var(--card); border:1px solid rgba(0,0,0,.06); border-radius:20px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,.06)}
+    h1{margin:0 0 12px; font-size:clamp(32px,5vw,48px); text-align:center;}
+    h2{margin-top:0}
+    p{opacity:.9; text-align:center}
+    .grid{display:grid; gap:16px}
+    .two{grid-template-columns:1fr 1fr}
+    .btn{border:1px solid rgba(0,0,0,.1); background:#f1f5f9; color:var(--text); padding:12px 16px; border-radius:14px; cursor:pointer; font-weight:600}
+    .btn.primary{background:linear-gradient(135deg,#34d399,#60a5fa); color:white; border:none}
+    .btn.good{background:linear-gradient(135deg,#22c55e,#8bff9a); color:#064e3b; border:none}
+    .teacher-list{display:grid; grid-template-columns:repeat(4,minmax(160px,1fr)); gap:12px}
+    .panel{background:#f8fafc; border:1px dashed rgba(0,0,0,.12); padding:16px; border-radius:14px}
+    .target{font-size:clamp(28px,6vw,54px); font-weight:900; text-align:center; background:linear-gradient(180deg,#0f172a,#3b82f6 70%); -webkit-background-clip:text; color:transparent}
+    .input-row{display:flex; justify-content:center}
+    input[type="text"]{width:min(580px,90%); font-size:20px; padding:14px 16px; border-radius:14px; border:1px solid rgba(0,0,0,.14)}
+    .hud{display:flex; gap:12px; justify-content:space-between; align-items:center; flex-wrap:wrap}
+    .chip{padding:8px 12px; border-radius:999px; border:1px solid rgba(0,0,0,.12); background:#eef2ff; font-weight:600}
+    .stickgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:8px}
+    .stick{display:flex; flex-direction:column; align-items:center; background:#fff; border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:6px}
+    .stick svg{width:44px; height:44px}
+    .tag{margin-top:4px; font-size:11px; text-align:center; width:100%}
+    .hidden{display:none}
+
+    .sassy-result{
+      font-size:clamp(42px,7vw,76px);
+      line-height:1.05;
+      font-weight:900;
+      text-align:center;
+      margin:8px 0 18px;
+      letter-spacing:-1px;
+      opacity:0;
+      transform:translateY(10px);
+    }
+    .sassy-result.show{
+      animation:sassyFade 1s ease-out forwards;
+    }
+    .sassy-result.low{color:#dc2626;}
+    .sassy-result.medium{color:#d97706;}
+    .sassy-result.high{color:#2563eb;}
+    .sassy-result.elite{
+      background:linear-gradient(90deg,#7c3aed,#2563eb,#059669);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    @keyframes sassyFade{
+      from{opacity:0; transform:translateY(10px);}
+      to{opacity:1; transform:translateY(0);}
+    }
+    .toggle-row{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap}
+    .switch{position:relative; display:inline-block; width:64px; height:34px}
+    .switch input{opacity:0; width:0; height:0}
+    .slider{position:absolute; cursor:pointer; inset:0; background:#cbd5e1; transition:.2s; border-radius:999px}
+    .slider:before{content:""; position:absolute; height:26px; width:26px; left:4px; bottom:4px; background:white; transition:.2s; border-radius:50%; box-shadow:0 1px 4px rgba(0,0,0,.25)}
+    .switch input:checked + .slider{background:#ef4444}
+    .switch input:checked + .slider:before{transform:translateX(30px)}
+    .mode-label{font-weight:900; font-size:18px}
+    .enter-tip{font-size:18px; font-weight:800; text-align:center; background:#eef6ff; border-radius:12px; padding:10px 14px}
+    @media (prefers-reduced-motion: reduce){
+      .sassy-result.show{animation:none; opacity:1; transform:none;}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="screen-setup" class="card grid">
+      <h1>Build Your Class - 4th Grade</h1>
+      <p>Type the name shown and press <b>ENTER</b> on your keyboard. See how many classmates you can type in 1 minute!</p>
+      <div class="panel grid">
+        <label for="playerName"><b>Your name</b></label>
+        <input id="playerName" type="text" placeholder="Type your first name" />
+        <div class="toggle-row">
+          <span class="mode-label">🔥 SAVAGE MODE: <span id="savageState">OFF</span></span>
+          <label class="switch" aria-label="Toggle Savage Mode">
+            <input id="savageToggle" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <h3>Select your teacher</h3>
+      <div id="teacherButtons" class="teacher-list"></div>
+    </div>
+
+    <div id="screen-game" class="card hidden grid">
+      <div class="hud">
+        <div class="chip">⏱️ Time: <span id="timeLeft">60.0</span>s</div>
+        <div class="chip">✅ Score: <span id="score">0</span></div>
+        <div class="chip">Class: <span id="hudClass"></span></div>
+        <div class="chip">Player: <span id="hudPlayer"></span></div>
+      </div>
+      <div class="chip" id="collectChip" style="justify-self:start">Collected: <span id="collected">0</span>/<span id="classTotal">0</span></div>
+      <div id="stickGrid" class="stickgrid"></div>
+      <div id="target" class="target">—</div>
+      <div class="enter-tip">Type the name exactly as shown, then press ENTER on your keyboard.</div>
+      <div class="input-row"><input id="answer" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" /></div>
+      <div class="grid two">
+        <button id="startBtn" class="btn primary">Start</button>
+        <button id="endBtn" class="btn">End Round</button>
+      </div>
+    </div>
+
+    <div id="screen-results" class="card hidden grid">
+      <h2>Round Over!</h2>
+      <div id="sassyResult" class="sassy-result"></div>
+      <p>Great work, <span id="resPlayer"></span> in <b><span id="resClass"></span></b>!</p>
+      <h3>Your Score: <span id="finalScore">0</span></h3>
+      <div id="resultsStickGrid" class="stickgrid"></div>
+      <div class="panel toggle-row">
+        <span class="mode-label">🔥 SAVAGE MODE: <span id="resultsSavageState">OFF</span></span>
+        <label class="switch" aria-label="Toggle Savage Mode for the next round">
+          <input id="resultsSavageToggle" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="grid two">
+        <button id="playAgain" class="btn good">Play Again</button>
+        <button id="switchClass" class="btn">Switch Class</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TEACHERS=["Mr. Deller","Mrs. Farrar","Mrs. Liebrock","Mrs. Shaffer"];
+    const CLASSLISTS={
+      "Mr. Deller":["Muhammadaziz","Grayson","Dominik","Asher","Madison","Maddox","Arabella","Landon","Luca","DeAndre","Hazel","Vincent","Joann","John","Henry","Lillian","Hunter","Marigold","Juniper","Marvin","Owen","Caiden"],
+      "Mrs. Farrar":["Jillian","Brady","Luna","Ky'Noah","Coraline","Maximus","Penelope","Naomi","Jimmy","Tristan","Tynai","Alex","Carson","Caiden","Samantha","Dylan","Jack","Avery","Henry","Connor","Madelyn","Luke"],
+      "Mrs. Liebrock":["Antonio","Greyson","Gradin","Gregory","Ella","Aryeh","Garrett","Austin","Leo","Samuel","Emilia","Ryder","Connor","Miles","Aria","Stella","Nicolas","Hadley","Eila","Charles","Kaylee","Blake"],
+      "Mrs. Shaffer":["Keagan","Averie","Riley","Kaiya","Lindsay","Enzo","Zane","Mason","Meena","Rivir","Michaela","Mia","Colton","Amelia","Jackson","Julian","Grayson","Luke","Santino","Rowan","Connor","Matthew"]
+    };
+
+    let currentClass,player,roundActive=false,score=0,timeLeft=60,ticker,pool,idx,collectedNames;
+    const screenSetup=document.getElementById('screen-setup'),screenGame=document.getElementById('screen-game'),screenResults=document.getElementById('screen-results');
+    const teacherButtons=document.getElementById('teacherButtons'),playerNameInput=document.getElementById('playerName');
+    const hudClass=document.getElementById('hudClass'),hudPlayer=document.getElementById('hudPlayer'),timeLeftEl=document.getElementById('timeLeft'),scoreEl=document.getElementById('score');
+    const targetEl=document.getElementById('target'),answerEl=document.getElementById('answer');
+    const startBtn=document.getElementById('startBtn'),endBtn=document.getElementById('endBtn');
+    const resPlayer=document.getElementById('resPlayer'),resClass=document.getElementById('resClass'),finalScore=document.getElementById('finalScore'),resultsStickGrid=document.getElementById('resultsStickGrid'),stickGrid=document.getElementById('stickGrid'),sassyResult=document.getElementById('sassyResult');
+    const collectedEl=document.getElementById('collected'),classTotalEl=document.getElementById('classTotal');
+    const playAgain=document.getElementById('playAgain'),switchClass=document.getElementById('switchClass');
+    const savageToggle=document.getElementById('savageToggle'),savageState=document.getElementById('savageState');
+    const resultsSavageToggle=document.getElementById('resultsSavageToggle'),resultsSavageState=document.getElementById('resultsSavageState');
+
+    function setSavageMode(isOn){
+      savageToggle.checked=isOn;
+      resultsSavageToggle.checked=isOn;
+      savageState.textContent=isOn?'ON':'OFF';
+      resultsSavageState.textContent=isOn?'ON':'OFF';
+    }
+
+    savageToggle.addEventListener('change',()=>setSavageMode(savageToggle.checked));
+    resultsSavageToggle.addEventListener('change',()=>{
+      // Change Savage Mode for the NEXT round only.
+      // Keep the completed round's message unchanged so the result stays a surprise.
+      setSavageMode(resultsSavageToggle.checked);
+    });
+
+    TEACHERS.forEach(t=>{
+      const b=document.createElement('button');
+      b.className='btn';
+      b.textContent=t;
+      b.onclick=()=>selectTeacher(t);
+      teacherButtons.appendChild(b)
+    });
+
+    function selectTeacher(t){
+      player=(playerNameInput.value||'Player').trim();
+      currentClass=t;
+      hudClass.textContent=t;
+      hudPlayer.textContent=player;
+      setupRound();
+      screenSetup.classList.add('hidden');
+      screenGame.classList.remove('hidden')
+    }
+
+    function setupRound(){
+      score=0;
+      scoreEl.textContent=0;
+      timeLeft=60;
+      timeLeftEl.textContent=timeLeft.toFixed(1);
+      roundActive=false;
+      clearInterval(ticker);
+
+      pool=shuffle([...CLASSLISTS[currentClass]]);
+      idx=0;
+      collectedNames=new Set();
+
+      stickGrid.innerHTML='';
+      resultsStickGrid.innerHTML='';
+      classTotalEl.textContent=CLASSLISTS[currentClass].length;
+      collectedEl.textContent='0';
+
+      setTarget('—'); // do not reveal a name until Start is clicked
+    }
+
+    function setTarget(name){
+      targetEl.textContent=name;
+      answerEl.value=''
+    }
+
+    function startRound(){
+      if(roundActive) return;
+      roundActive=true;
+      setTarget(pool[idx]); // reveal the first name only now
+      let last=performance.now();
+      ticker=setInterval(()=>{
+        const now=performance.now();
+        const dt=(now-last)/1000;
+        last=now;
+        timeLeft=Math.max(0,timeLeft-dt);
+        timeLeftEl.textContent=timeLeft.toFixed(1);
+        if(timeLeft<=0) endRound()
+      },100)
+    }
+
+
+    const SAVAGE_SAYINGS = {
+      low: [
+        "Did you forget this was a typing game?",
+        "Were your fingers buffering?",
+        "The keyboard saw you coming and took a nap.",
+        "I've seen loading screens move faster.",
+        "Your fingers had 60 seconds. They chose peace.",
+        "Did you type these with one finger?",
+        "The space bar worked harder than you did.",
+        "Your keyboard is asking if you're okay.",
+        "This was less speed typing and more casual visiting.",
+        "Somewhere, a turtle just beat your score.",
+        "The names were right there. RIGHT. THERE.",
+        "At least you didn't wear out the keys.",
+        "Breaking news: keyboard remains in mint condition.",
+        "Were you waiting for the names to type themselves?",
+        "I'm not mad. I'm just... confused.",
+        "The timer gave everything it had.",
+        "The keyboard would like to schedule a meeting.",
+        "Your fingers really took the scenic route."
+      ],
+      medium: [
+        "Okay. Technically, that was typing.",
+        "Not terrible. Not exactly legendary.",
+        "Your keyboard has seen worse.",
+        "We're going to call that... progress.",
+        "You showed up. You typed. We move on.",
+        "Respectable-ish.",
+        "The fingers are awake now.",
+        "There was typing. I can confirm that.",
+        "You're warming up. Very, very slowly.",
+        "Not bad. Let's not make a trophy yet."
+      ],
+      high: [
+        "Okayyy, now we're getting somewhere!",
+        "Your fingers are officially awake.",
+        "Now THAT looks like typing.",
+        "You were this close to showing off.",
+        "Solid work. One more round could get dangerous.",
+        "The keyboard is starting to respect you.",
+        "Look at you picking up speed!",
+        "That was actually pretty good.",
+        "You've entered speedster territory.",
+        "Keep going — your fingers have more in them."
+      ],
+      elite: [
+        "Okay, SPEEDSTER!",
+        "Your fingers understood the assignment.",
+        "That keyboard never stood a chance.",
+        "Typing machine activated.",
+        "Now THAT was a round!",
+        "Your keyboard is impressed.",
+        "Save some names for everybody else!",
+        "Excellent typing!",
+        "You crushed that round.",
+        "Fast AND accurate. Nice work!",
+        "Somebody has been practicing.",
+        "That was seriously impressive."
+      ]
+    };
+
+    const ENCOURAGING_SAYINGS = {
+      low: [
+        "Nice effort! Try another round and see if you can beat your score.",
+        "Every round is practice. Keep going!",
+        "You got started — now see what you can do next round!",
+        "Keep practicing. Your speed will grow!",
+        "Good try! Focus on accuracy and build from there."
+      ],
+      medium: [
+        "Good work! You're building your typing speed.",
+        "Nice job — try another round and beat your score!",
+        "You're making progress. Keep it going!",
+        "Solid effort! Accuracy first, then speed.",
+        "You're getting there! Keep practicing."
+      ],
+      high: [
+        "Great job! You're typing with good speed and accuracy.",
+        "Nice work! You're getting faster.",
+        "Strong round! See if you can reach 15 next time.",
+        "You're doing really well — keep going!",
+        "Excellent progress! Your practice is paying off."
+      ],
+      elite: [
+        "Fantastic typing!",
+        "Excellent work — fast and accurate!",
+        "You crushed that round!",
+        "Awesome job! Your typing skills are showing.",
+        "Great speed! Keep challenging yourself.",
+        "Amazing round — nice work!"
+      ]
+    };
+
+    function getResultMessage(score){
+      let band = "elite";
+      if(score <= 5) band = "low";
+      else if(score <= 10) band = "medium";
+      else if(score <= 14) band = "high";
+      const bank = savageToggle.checked ? SAVAGE_SAYINGS : ENCOURAGING_SAYINGS;
+      const bucket = bank[band];
+      return { band, saying: bucket[Math.floor(Math.random() * bucket.length)] };
+    }
+
+    function endRound(){
+      roundActive=false;
+      clearInterval(ticker);
+      finalScore.textContent=score;
+      const sassy=getResultMessage(score);
+      sassyResult.className="sassy-result";
+      sassyResult.textContent=sassy.saying;
+      void sassyResult.offsetWidth;
+      sassyResult.classList.add(sassy.band,"show");
+      resPlayer.textContent=player;
+      resClass.textContent=currentClass;
+      resultsStickGrid.innerHTML=stickGrid.innerHTML;
+      screenGame.classList.add('hidden');
+      screenResults.classList.remove('hidden')
+    }
+
+    function nextName(){
+      idx++;
+      if(idx>=pool.length){
+        pool=shuffle(pool);
+        idx=0
+      }
+      setTarget(pool[idx])
+    }
+
+    answerEl.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkAnswer()}});
+    answerEl.addEventListener('paste',e=>e.preventDefault());
+    answerEl.addEventListener('drop',e=>e.preventDefault());
+    answerEl.addEventListener('beforeinput',e=>{if(e.inputType==='insertFromPaste'||e.inputType==='insertFromDrop')e.preventDefault()});
+    function normalize(s){return s.trim()}
+    function checkAnswer(){
+      const expected=targetEl.textContent;
+      if(normalize(answerEl.value)===normalize(expected)){
+        if(roundActive){
+          score++;
+          scoreEl.textContent=score;
+          if(!collectedNames.has(expected)){
+            collectedNames.add(expected);
+            addStickFigure(expected);
+            collectedEl.textContent=String(collectedNames.size);
+          }
+          nextName()
+        }
+      }else{
+        answerEl.classList.remove('wrong');
+        void answerEl.offsetWidth;
+        answerEl.classList.add('wrong')
+      }
+    }
+
+    startBtn.onclick=()=>{setupRound();startRound();answerEl.focus()};
+    endBtn.onclick=()=>endRound();
+    playAgain.onclick=()=>{screenResults.classList.add('hidden');screenGame.classList.remove('hidden');setupRound()};
+    switchClass.onclick=()=>{screenResults.classList.add('hidden');screenSetup.classList.remove('hidden')};
+
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]]
+      }
+      return a
+    }
+
+
+    const ACCESSORIES = [
+      "cowboy","crown","baseball","football","wizard","party",
+      "antennae","bunny","sunglasses","crazywig","rapunzel","bow"
+    ];
+
+    const SHIRT_COLORS = [
+      "#60a5fa","#34d399","#f472b6","#f59e0b","#a78bfa","#22d3ee",
+      "#fb7185","#84cc16","#f97316","#818cf8"
+    ];
+
+    function randomFrom(arr){
+      return arr[Math.floor(Math.random()*arr.length)];
+    }
+
+    function addStickFigure(name){
+      const accessory=randomFrom(ACCESSORIES);
+      const shirt=randomFrom(SHIRT_COLORS);
+
+      const d=document.createElement('div');
+      d.className='stick';
+      d.innerHTML=stickSVG(accessory,shirt)+`<div class="tag">${name}</div>`;
+      stickGrid.appendChild(d)
+    }
+
+    function stickSVG(accessory,shirt){
+      const head = `
+        <circle cx="24" cy="14" r="7" fill="#fde68a" stroke="#1f2937" stroke-width="1.6"/>
+      `;
+
+      const body = `
+        <line x1="24" y1="21" x2="24" y2="34" stroke="${shirt}" stroke-width="5" stroke-linecap="round"/>
+        <line x1="24" y1="24" x2="14" y2="28" stroke="#1f2937" stroke-width="2.2"/>
+        <line x1="24" y1="24" x2="34" y2="28" stroke="#1f2937" stroke-width="2.2"/>
+        <line x1="24" y1="34" x2="16" y2="43" stroke="#1f2937" stroke-width="2.2"/>
+        <line x1="24" y1="34" x2="32" y2="43" stroke="#1f2937" stroke-width="2.2"/>
+      `;
+
+      let extra = "";
+
+      if(accessory==="cowboy"){
+        extra = `
+          <path d="M12 8 H36" stroke="#92400e" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M17 8 Q24 1 31 8 Z" fill="#d97706" stroke="#7c2d12" stroke-width="1.4"/>
+        `;
+      } else if(accessory==="crown"){
+        extra = `
+          <path d="M16 8 L19 2 L24 7 L29 2 L32 8 L31 11 H17 Z" fill="#facc15" stroke="#92400e" stroke-width="1.2"/>
+        `;
+      } else if(accessory==="baseball"){
+        extra = `
+          <path d="M17 8 Q24 3 31 8 L30 10 H18 Z" fill="#3b82f6" stroke="#1e3a8a" stroke-width="1.2"/>
+          <path d="M30 9 Q35 10 37 12" fill="none" stroke="#1e3a8a" stroke-width="1.8"/>
+        `;
+      } else if(accessory==="football"){
+        extra = `
+          <path d="M16 9 Q24 1 32 9 L31 15 H17 Z" fill="#111827" stroke="#374151" stroke-width="1.2"/>
+          <path d="M31 11 H36 V15 H31" fill="none" stroke="#6b7280" stroke-width="1.2"/>
+        `;
+      } else if(accessory==="wizard"){
+        extra = `
+          <path d="M15 9 L24 0 L33 9 Z" fill="#7c3aed" stroke="#4c1d95" stroke-width="1.2"/>
+          <circle cx="24" cy="5" r="1.2" fill="#fde047"/>
+          <path d="M13 10 H35" stroke="#4c1d95" stroke-width="2"/>
+        `;
+      } else if(accessory==="party"){
+        extra = `
+          <path d="M18 9 L24 0 L30 9 Z" fill="#f472b6" stroke="#9d174d" stroke-width="1.2"/>
+          <circle cx="24" cy="0.8" r="1.5" fill="#22c55e"/>
+        `;
+      } else if(accessory==="antennae"){
+        extra = `
+          <line x1="20" y1="8" x2="17" y2="2" stroke="#16a34a" stroke-width="1.5"/>
+          <line x1="28" y1="8" x2="31" y2="2" stroke="#16a34a" stroke-width="1.5"/>
+          <circle cx="17" cy="2" r="1.7" fill="#22c55e"/>
+          <circle cx="31" cy="2" r="1.7" fill="#22c55e"/>
+        `;
+      } else if(accessory==="bunny"){
+        extra = `
+          <ellipse cx="20" cy="4" rx="2.2" ry="5" fill="#f9a8d4" stroke="#831843" stroke-width="1"/>
+          <ellipse cx="28" cy="4" rx="2.2" ry="5" fill="#f9a8d4" stroke="#831843" stroke-width="1"/>
+        `;
+      } else if(accessory==="sunglasses"){
+        extra = `
+          <rect x="17" y="12" width="5" height="3" rx="1" fill="#111827"/>
+          <rect x="26" y="12" width="5" height="3" rx="1" fill="#111827"/>
+          <line x1="22" y1="13.5" x2="26" y2="13.5" stroke="#111827" stroke-width="1"/>
+        `;
+      } else if(accessory==="crazywig"){
+        extra = `
+          <circle cx="17" cy="8" r="3" fill="#ef4444"/>
+          <circle cx="21" cy="5" r="3" fill="#f59e0b"/>
+          <circle cx="25" cy="4" r="3" fill="#22c55e"/>
+          <circle cx="29" cy="5" r="3" fill="#3b82f6"/>
+          <circle cx="32" cy="8" r="3" fill="#a855f7"/>
+        `;
+      } else if(accessory==="rapunzel"){
+        extra = `
+          <path d="M17 8 Q24 2 31 8" fill="none" stroke="#ca8a04" stroke-width="2.4"/>
+          <path d="M17 10 Q14 24 16 37" fill="none" stroke="#ca8a04" stroke-width="2.2"/>
+          <path d="M31 10 Q34 24 32 37" fill="none" stroke="#ca8a04" stroke-width="2.2"/>
+        `;
+      } else if(accessory==="bow"){
+        extra = `
+          <path d="M15 7 Q10 2 11 9 Q12 13 17 9 Z" fill="#ec4899" stroke="#9d174d" stroke-width="1"/>
+          <path d="M17 7 Q22 2 21 9 Q20 13 16 9 Z" fill="#f472b6" stroke="#9d174d" stroke-width="1"/>
+          <circle cx="16" cy="8" r="1.5" fill="#be185d"/>
+        `;
+      }
+
+      return `
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        ${head}
+        ${extra}
+        ${body}
+      </svg>`;
+    }
+  </script>
+</body>
+</html>
